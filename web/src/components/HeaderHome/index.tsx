@@ -6,8 +6,8 @@ import rocketImg from '../../assets/icons/rocket.png'
 function HeaderHome () {
   return (
     <HeaderContainer>
-      <img src={rocketImg} alt="Rocket Icon"/>
-      <h2>SoftWrap-Challenge</h2>
+      <img src={rocketImg} alt="Rocket Icon" />
+      <h2>Gerenciamento de Usuários</h2>
     </HeaderContainer>
   )
 }

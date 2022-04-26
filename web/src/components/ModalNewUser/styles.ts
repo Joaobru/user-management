@@ -3,9 +3,6 @@ import styled from 'styled-components'
 export const FormModal = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 0.2rem;
 `
 
 export const GroupInputForm = styled.div`
@@ -15,8 +12,30 @@ export const GroupInputForm = styled.div`
   width: 100%;
 `
 
+export const GroupInputFormCpf = styled.div`
+  display: flex;
+  flex-direction: column;
+  width:100%;
+
+  @media(min-width: 600px) {
+    width: 45%
+  }  
+`
+
 export const TwoInputForm = styled.div`
   display: flex;
-  justify-content: space-between;
-  width: 100%
+  flex-direction: column;
+
+  @media(min-width: 600px) {
+    flex-direction: row;
+    justify-content: space-between;
+    width:100%;
+  }  
+`
+export const GroupInputFormFromTwoModal = styled(GroupInputForm)`
+  width:100%;
+
+  @media(min-width: 600px) {
+    width:45%;
+  }  
 `

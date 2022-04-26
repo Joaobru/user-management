@@ -1,5 +1,7 @@
 import api from '../api'
 
 export const postUser = async (body: object) => {
-  await api.post('user', body)
+  const result = await api.post('user', body)
+
+  return result
 }

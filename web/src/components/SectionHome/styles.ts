@@ -29,3 +29,10 @@ export const PageComponent = styled.div`
     margin-top: 0.3rem !important;
   }
 `
+
+export const LoadingCustomize = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 91vh;
+`

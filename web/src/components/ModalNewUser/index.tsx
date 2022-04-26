@@ -4,13 +4,16 @@ import React, { SetStateAction, useState, useEffect } from 'react'
 import { Modal } from 'react-bootstrap'
 
 import { user } from '../TableComponent'
+import { get } from '../SectionHome'
 import { getUfs } from '../../services/ibge/getUfs'
 import { postUser } from '../../services/users/postUser'
 import { updateUser } from '../../services/users/updateUser'
-import { getUsers } from '../../services/users/getUsers'
 import { getCityList } from '../../services/ibge/getCity'
 
-import { FormModal, GroupInputForm, TwoInputForm } from './styles'
+import InputMask from 'react-input-mask'
+import swal from 'sweetalert'
+
+import { FormModal, GroupInputForm, TwoInputForm, GroupInputFormCpf, GroupInputFormFromTwoModal } from './styles'
 
 export interface modalAddUser {
   users: Array<user>
@@ -27,6 +30,9 @@ export interface modalAddUser {
   usersUpdate: number;
 
   setUsers: Function;
+  setTotalPage: Function;
+  setPage: Function;
+  setLoading: Function;
 }
 
 interface ufInterface {
@@ -52,13 +58,13 @@ const optionCivilState = [
   { id: 3, value: 'viuvo', option: 'Viúvo' }
 ]
 
-function ModalNewUser ({ modalNewUser, setModalNewUser, setUsers, page, titleModal, action, idUser, usersUpdate, users }: modalAddUser) {
+function ModalNewUser ({ modalNewUser, setModalNewUser, setUsers, page, titleModal, action, idUser, usersUpdate, users, setTotalPage, setPage, setLoading }: modalAddUser) {
   // Geo Location
   const [ufList, setUfList] = useState([])
   const [cityList, setCityList] = useState([])
 
   // Loading Aplication
-  const [loading, setLoading] = useState(true)
+  const [loadingUf, setLoadingUf] = useState(true)
   const [cityLoading, setCityLoading] = useState(true)
 
   // Form
@@ -70,7 +76,7 @@ function ModalNewUser ({ modalNewUser, setModalNewUser, setUsers, page, titleMod
   const [cidade, setCidade] = useState('0')
 
   useEffect(() => {
-    getUfList(setUfList, setLoading)
+    getUfList(setUfList, setLoadingUf)
   }, [])
 
   useEffect(() => {
@@ -98,43 +104,41 @@ function ModalNewUser ({ modalNewUser, setModalNewUser, setUsers, page, titleMod
               <input value={nome} onChange={(e:any) => { setNome(e.target.value) }} type="nome" id="nome" placeholder="Usuário"/>
             </GroupInputForm>
             <TwoInputForm>
-              <GroupInputForm>
+              <GroupInputFormFromTwoModal>
                 <label htmlFor="idade">Idade</label>
                 <input value={idade} onChange={(e:any) => { setIdade(Number(e.target.value)) }} type="number" id="idade" placeholder="Idade"/>
-              </GroupInputForm>
+              </GroupInputFormFromTwoModal>
 
-              <GroupInputForm>
+              <GroupInputFormFromTwoModal>
                 <label htmlFor="estadoCivil">Estado Civil</label>
                 <select onChange={(e:any) => { setEstadoCivil(e.target.value) }} name="estadoCivil" id="estadoCivil">
                   <option value="0" disabled selected>Selecione Seu Estado Civil</option>
-
-                  <option value="casado">Casado</option>
                   {optionCivilState.map((civilState: civilStateInterface) => {
                     return (
                       <option key={civilState.id} value={civilState.value} selected={action === 'UpdateUser' ? civilState.value === users[usersUpdate].estadoCivil : false}>{civilState.option}</option>
                     )
                   })}
                 </select>
-              </GroupInputForm>
+              </GroupInputFormFromTwoModal>
             </TwoInputForm>
 
             <TwoInputForm>
-              <GroupInputForm>
+              <GroupInputFormFromTwoModal>
                 <label htmlFor="idade">Estado</label>
                 {/* eslint-disable-next-line react/jsx-no-duplicate-props */ }
                 {/* eslint-disable-next-line no-unused-expressions */}
                 <select onChange={(e:any) => { console.log(e.target.value, '---'); getCidades(setCityLoading, setCityList, e.target.value, setUfId); console.log(ufId) }} name="estado" id="estado">
                   <option value="0" disabled selected={action !== 'UpdateUser'}>Selecione um Estado</option>
-                  {!loading && (ufList.map((uf:ufInterface) => {
+                  {!loadingUf && (ufList.map((uf:ufInterface) => {
                     return (
                       <option key={uf.id} value={uf.id + '-' + uf.sigla} selected={action === 'UpdateUser' ? uf.sigla === users[usersUpdate].estado : false}>{uf.sigla}</option>
                     )
                   }))}
                 </select>
-              </GroupInputForm>
+              </GroupInputFormFromTwoModal>
 
-              <GroupInputForm>
-                <label htmlFor="cidade">Cidade</label>
+              <GroupInputFormFromTwoModal>
+                <label>Cidade</label>
                 <select onChange={(e:any) => { setCidade(e.target.value) }} disabled={cityLoading} name="estadoCivil" id="estadoCivil">
                 <option value="0" disabled hidden selected={action !== 'UpdateUser'}>Selecione uma Cidade</option>
                   { cityList && (cityList.map((city:cityInterface) => {
@@ -143,26 +147,26 @@ function ModalNewUser ({ modalNewUser, setModalNewUser, setUsers, page, titleMod
                     )
                   }))}
                 </select>
-              </GroupInputForm>
+              </GroupInputFormFromTwoModal>
             </TwoInputForm>
-            <div>
-              <label htmlFor="cpf">CPF</label>
-              <input value={cpf} onChange={(e:any) => { setCpf(e.target.value) }} type="text" id="cpf" placeholder="CPF"/>
-            </div>
+            <GroupInputFormCpf>
+              <label>CPF</label>
+              <InputMask value={cpf} onChange={(e:any) => { setCpf(e.target.value) }} type='text' mask='999.999.999-99' id='cpf' maskPlaceholder="CPF"/>
+            </GroupInputFormCpf>
           </FormModal>
         </Modal.Body>
         <Modal.Footer>
           <button onClick={() => { setModalNewUser(false); clearDataModal(setNome, setIdade, setEstadoCivil, setCpf, setCidade, setUfId, setCityLoading); console.log(usersUpdate) }} type='button' className='btn btn-danger'>Não</button>
-          <button onClick={() => { addNewUser(nome, idade, estadoCivil, cpf, cidade, ufId, setUsers, page, setModalNewUser, setNome, setIdade, setEstadoCivil, setCpf, setCidade, setUfId, action, idUser, setCityLoading) }} type='button' className='btn btn-success'>Sim</button>
+          <button onClick={() => { addNewUser(nome, idade, estadoCivil, cpf, cidade, ufId, setUsers, page, setModalNewUser, setNome, setIdade, setEstadoCivil, setCpf, setCidade, setUfId, action, idUser, setCityLoading, setTotalPage, setPage, setLoading) }} type='button' className='btn btn-success'>Sim</button>
         </Modal.Footer>
       </Modal>
   )
 }
 
-async function getUfList (setUfList: Function, setLoading: Function) {
+async function getUfList (setUfList: Function, setLoadingUf: Function) {
   setUfList(await getUfs())
 
-  setLoading(false)
+  setLoadingUf(false)
 }
 
 async function getCityListUpload (setCityList: Function, users: Array<user>, usersUpdate: number) {
@@ -179,24 +183,27 @@ async function getCidades (setCityLoading: Function, setCityList: Function, ufId
   setCityLoading(false)
 }
 
-async function addNewUser (nome: string, idade: number, estadoCivil: string, cpf:string, cidade: string, estado: string, setUsers: Function, page: number, setModalNewUser: Function, setNome: Function, setIdade: Function, setEstadoCivil: Function, setCpf: Function, setCidade: Function, setUfId: Function, action: string, idUser: number, setCityLoading: Function) {
-  if (nome !== '' && idade !== 0 && estadoCivil !== '0' && cpf !== '' && cidade !== '' && estado !== '') {
+async function addNewUser (nome: string, idade: number, estadoCivil: string, cpf:string, cidade: string, estado: string, setUsers: Function, page: number, setModalNewUser: Function, setNome: Function, setIdade: Function, setEstadoCivil: Function, setCpf: Function, setCidade: Function, setUfId: Function, action: string, idUser: number, setCityLoading: Function, setTotalPage: Function, setPage:Function, setLoading: Function) {
+  const validationCpf = cpf.split('_')
+
+  if (validationCpf.length !== 1) {
+    swal('Erro', 'Cpf inválido', 'error')
+  } else if (nome !== '' && idade !== 0 && estadoCivil !== '0' && cpf !== '' && cidade !== '' && estado !== '') {
     const obj = { nome, idade, estadoCivil, cpf, cidade, estado }
 
-    console.log(obj)
+    const responseAction = action === 'AddUser' ? await postUser(obj) : await updateUser(obj, idUser)
 
-    action === 'AddUser' ? await postUser(obj) : await updateUser(obj, idUser)
-
-    const result = await getUsers(page)
-    console.log(result)
-    setUsers(result.data)
-    setModalNewUser(false)
-    clearDataModal(setNome, setIdade, setEstadoCivil, setCpf, setCidade, setUfId, setCityLoading)
+    if (responseAction.data.success) {
+      swal('Bom Trabalho', responseAction.data.message, 'success')
+      get(page, setTotalPage, setUsers, setPage, setLoading)
+      setModalNewUser(false)
+      clearDataModal(setNome, setIdade, setEstadoCivil, setCpf, setCidade, setUfId, setCityLoading)
+    } else {
+      swal('Erro', responseAction.data.message, 'error')
+    }
   } else {
-    alert('Por favor preencha todos os dados!')
+    swal('Erro', 'Por favor preencha todos os dados!', 'error')
   }
-  console.log(action, 'action')
-  console.log('passou por aqui')
 }
 
 function clearDataModal (setNome: Function, setIdade: Function, setEstadoCivil: Function, setCpf: Function, setCidade: Function, setUfId: Function, setCityLoading: Function) {

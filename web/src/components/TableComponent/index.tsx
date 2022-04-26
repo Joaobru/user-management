@@ -1,8 +1,8 @@
 import React from 'react'
 
-import { Table } from 'react-bootstrap'
 import { FiTrash2, FiSettings } from 'react-icons/fi'
 import { IconsModal } from './styles'
+import { Table } from 'react-bootstrap'
 
 interface TableOptionShowModal {
   setModalNewUser: Function;
@@ -29,7 +29,8 @@ export interface user {
 function TableComponent ({ setTitleModal, setModalNewUser, users, setModalDeleteUser, setIdUser, setAction, setUsersUpdate }: TableOptionShowModal) {
   return (
       <>
-        <Table bordered>
+        { users.length !== 0
+          ? <Table responsive>
           <thead>
             <tr>
               <th></th>
@@ -46,7 +47,7 @@ function TableComponent ({ setTitleModal, setModalNewUser, users, setModalDelete
             {users.map((user:user, index) => {
               return (
               <tr key={user.id}>
-                <th scope="row">{user.id}</th>
+                <th scope="row">{index + 1}</th>
                 <td>{user.nome}</td>
                 <td>{user.idade}</td>
                 <td>{user.estadoCivil}</td>
@@ -62,6 +63,8 @@ function TableComponent ({ setTitleModal, setModalNewUser, users, setModalDelete
             })}
           </tbody>
         </Table>
+          : <h1 className='text-center'>Nenhum usuário cadastrado</h1>
+        }
       </>
   )
 }
